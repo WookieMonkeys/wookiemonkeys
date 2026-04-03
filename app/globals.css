@@ -48,8 +48,17 @@
 }
 
 :root {
+    /* Fixed site header height; trail controls + inner pages clear this much from the top. */
+    --site-header-offset: 6.5rem;
+    /**
+     * Default cursor for the page (inherits everywhere unless an element sets its own).
+     * Examples: auto | crosshair | cell | grab
+     * Custom image: url("/your-cursor.svg") 12 12, auto;
+     * (hotspot x y before the fallback cursor)
+     */
+    --site-cursor: auto;
     /* Palette: Beige #D5DDBC, Crimson #931F1D, Copper #937B63, Palm #8A9B68, Sage #B6C197 */
-    --background: oklch(0.8827 0.0449 118.4);
+    --background: oklch(1 0 0);
     --foreground: oklch(0.2804 0.007 48.46);
     --card: oklch(0.925 0.038 119);
     --card-foreground: oklch(0.2804 0.007 48.46);
@@ -83,38 +92,25 @@
     --sidebar-ring: oklch(0.663 0.0741 123.39);
 }
 
-.dark {
-    --background: oklch(0.24 0.028 118);
-    --foreground: oklch(0.91 0.035 118);
-    --card: oklch(0.29 0.03 118);
-    --card-foreground: oklch(0.91 0.035 118);
-    --popover: oklch(0.29 0.03 118);
-    --popover-foreground: oklch(0.91 0.035 118);
-    --primary: oklch(0.55 0.14 27);
-    --primary-foreground: oklch(0.96 0.02 118);
-    --secondary: oklch(0.45 0.04 67);
-    --secondary-foreground: oklch(0.96 0.02 118);
-    --muted: oklch(0.34 0.03 120);
-    --muted-foreground: oklch(0.72 0.045 115);
-    --accent: oklch(0.58 0.07 123);
-    --accent-foreground: oklch(0.18 0.02 50);
-    --destructive: oklch(0.55 0.18 25);
-    --border: oklch(0.91 0.035 118 / 0.12);
-    --input: oklch(0.91 0.035 118 / 0.15);
-    --ring: oklch(0.58 0.07 123);
-    --chart-1: oklch(0.55 0.14 27);
-    --chart-2: oklch(0.55 0.045 67);
-    --chart-3: oklch(0.58 0.07 123);
-    --chart-4: oklch(0.65 0.055 120);
-    --chart-5: oklch(0.75 0.05 119);
-    --sidebar: oklch(0.26 0.028 118);
-    --sidebar-foreground: oklch(0.91 0.035 118);
-    --sidebar-primary: oklch(0.55 0.14 27);
-    --sidebar-primary-foreground: oklch(0.96 0.02 118);
-    --sidebar-accent: oklch(0.34 0.03 120);
-    --sidebar-accent-foreground: oklch(0.91 0.035 118);
-    --sidebar-border: oklch(0.91 0.035 118 / 0.12);
-    --sidebar-ring: oklch(0.58 0.07 123);
+/**
+ * Full-viewport bottom photo. Size is set on this element so `background-size`
+ * always applies (inline `var(--x)` from React can miss `:root` in some cases).
+ * Edit `--site-bg-photo-size` here to resize.
+ */
+.site-bg-photo {
+  --site-bg-photo-size: min(72vw, 720px);
+  background-color: var(--background);
+  background-image: url("/e2.jpg");
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  background-size: var(--site-bg-photo-size);
+}
+
+@media (max-width: 767px) {
+  .site-bg-photo {
+    /* Slightly larger than desktop `72vw` so the photo reads better on small screens. */
+    --site-bg-photo-size: min(84vw, 720px);
+  }
 }
 
 @layer base {
@@ -126,5 +122,6 @@
     }
   html {
     @apply font-sans;
+    cursor: var(--site-cursor);
     }
 }
