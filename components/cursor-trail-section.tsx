@@ -6,8 +6,10 @@ import { Switch } from "@/components/ui/switch"
 import { cn } from "@/lib/utils"
 import { trailImagesForSource } from "@/lib/trail-image-sets"
 
-const MIN_MOVE_PX_MOUSE = 24
-const MIN_MOVE_PX_TOUCH = 8
+const MIN_MOVE_PX_MOUSE = 123
+const MIN_MOVE_PX_TOUCH = 54
+const MOVE_JITTER_PX_MOUSE = 66
+const MOVE_JITTER_PX_TOUCH = 32
 const MAX_NODES = 56
 /** Portrait stamp frame: width and instant-film aspect (~3.5×4.2) for wheel + polaroid. */
 const STAMP_FRAME_WIDTH = 104
@@ -16,12 +18,14 @@ const STAMP_FRAME_ASPECT = 4.2 / 3.5
  * Polaroid stamp width = {@link STAMP_FRAME_WIDTH} × scale.
  * Narrow = below Tailwind `md` (max-width 767px); wide = `md` and up.
  */
-const POLAROID_STAMP_SCALE_NARROW = 1.75
+const POLAROID_STAMP_SCALE_NARROW = 1.35
 const POLAROID_STAMP_SCALE_WIDE = 3
 const POLAROID_STAMP_MQ = "(max-width: 767px)"
 
 /** Slight scale on polaroid photos (frame has overflow-hidden). */
 const POLAROID_IMAGE_ZOOM_CLASS = "origin-center scale-[1.07]"
+const POSITION_JITTER_PX = 20
+const ROTATION_JITTER_DEG = 12
 
 /** Polaroid border cycle: rainbow order (red → … → blue). */
 const POLAROID_BORDER_RAINBOW = [
@@ -38,6 +42,8 @@ type CursorTrailSectionProps = {
   intro?: React.ReactNode
   /** Grow the trail section to fill remaining flex height (e.g. viewport). */
   fillHeight?: boolean
+  /** When set, polaroid trail uses this list; else `POLAROID_TRAIL_IMAGES` from `public/polaroid`. */
+  polaroidImageUrls?: readonly string[]
 }
 
 export function CursorTrailSection({
@@ -45,23 +51,37 @@ export function CursorTrailSection({
   className,
   intro,
   fillHeight,
+  polaroidImageUrls,
 }: CursorTrailSectionProps) {
   const interactiveAreaRef = React.useRef<HTMLDivElement>(null)
   const trailLayerRef = React.useRef<HTMLDivElement>(null)
   const lastRef = React.useRef({ x: 0, y: 0, ready: false })
   const stampIndexRef = React.useRef(0)
   const polaroidBorderIndexRef = React.useRef(0)
+  const nextMoveThresholdPxRef = React.useRef(MIN_MOVE_PX_MOUSE)
   const reduceMotionRef = React.useRef(true)
   const [polaroidOn, setPolaroidOn] = React.useState(true)
   const polaroidOnRef = React.useRef(true)
-  polaroidOnRef.current = polaroidOn
 
-  const trailImagesRef = React.useRef<readonly string[]>(
-    trailImagesForSource("polaroid")
-  )
-  trailImagesRef.current = trailImagesForSource("polaroid")
+  const polaroidUrls = polaroidImageUrls ?? trailImagesForSource("polaroid")
+  const trailImagesRef = React.useRef<readonly string[]>(polaroidUrls)
 
   const polaroidScaleRef = React.useRef(POLAROID_STAMP_SCALE_WIDE)
+
+  React.useLayoutEffect(() => {
+    polaroidOnRef.current = polaroidOn
+  }, [polaroidOn])
+
+  React.useLayoutEffect(() => {
+    trailImagesRef.current = polaroidUrls
+  }, [polaroidUrls])
+
+  const pickNextMoveThreshold = React.useCallback(
+    (basePx: number, jitterPx: number) => {
+      nextMoveThresholdPxRef.current = basePx + Math.random() * jitterPx
+    },
+    []
+  )
 
   const clearStamps = React.useCallback(() => {
     trailLayerRef.current?.replaceChildren()
@@ -122,6 +142,9 @@ export function CursorTrailSection({
 
       const frameW = Math.round(STAMP_FRAME_WIDTH * polaroidScaleRef.current)
       const frameH = Math.round(frameW * STAMP_FRAME_ASPECT)
+      const jitterX = (Math.random() - 0.5) * 2 * POSITION_JITTER_PX
+      const jitterY = (Math.random() - 0.5) * 2 * POSITION_JITTER_PX
+      const rotateDeg = (Math.random() - 0.5) * 2 * ROTATION_JITTER_DEG
       const src = images[stampIndexRef.current % images.length]!
       stampIndexRef.current += 1
 
@@ -143,10 +166,11 @@ export function CursorTrailSection({
         polaroidBorderIndexRef.current += 1
         node.style.borderColor = POLAROID_BORDER_RAINBOW[i]!
       }
-      node.style.left = `${x - (frameW * 3) / 4}px`
-      node.style.top = `${y - (frameH * 3) / 4}px`
+      node.style.left = `${x - (frameW * 3) / 4 + jitterX}px`
+      node.style.top = `${y - (frameH * 3) / 4 + jitterY}px`
       node.style.width = `${frameW}px`
       node.style.height = `${frameH}px`
+      node.style.rotate = `${rotateDeg}deg`
       node.setAttribute("aria-hidden", "true")
 
       const img = document.createElement("img")
@@ -187,6 +211,7 @@ export function CursorTrailSection({
         last.x = clientX
         last.y = clientY
         last.ready = true
+        pickNextMoveThreshold(minMovePx, 0)
         spawnNode(clientX, clientY)
         return
       }
@@ -194,11 +219,18 @@ export function CursorTrailSection({
       if (!force) {
         const dx = clientX - last.x
         const dy = clientY - last.y
-        if (dx * dx + dy * dy < minMovePx * minMovePx) return
+        const thresholdPx = nextMoveThresholdPxRef.current
+        if (dx * dx + dy * dy < thresholdPx * thresholdPx) return
       }
 
       last.x = clientX
       last.y = clientY
+      pickNextMoveThreshold(
+        minMovePx,
+        minMovePx === MIN_MOVE_PX_TOUCH
+          ? MOVE_JITTER_PX_TOUCH
+          : MOVE_JITTER_PX_MOUSE
+      )
       spawnNode(clientX, clientY)
     }
 
@@ -277,8 +309,8 @@ export function CursorTrailSection({
   }, [])
 
   const polaroidToggle = (
-    <label className="flex cursor-pointer items-center gap-2 select-none">
-      <span className="text-sm text-muted-foreground">Polaroids</span>
+    <label className="flex cursor-pointer items-center gap-1.5 select-none sm:gap-2">
+      <span className="text-xs text-muted-foreground sm:text-sm">Polaroids</span>
       <Switch
         size="sm"
         className="border-transparent data-checked:border-[#728557] data-checked:bg-[#8A9B68]"
@@ -333,8 +365,8 @@ export function CursorTrailSection({
                 aria-hidden
               />
             </div>
-            <div className="pointer-events-none absolute right-4 bottom-4 z-30 sm:right-6 sm:bottom-6">
-              <div className="pointer-events-auto rounded-lg border border-border/50 bg-background/90 px-3 py-2 shadow-sm backdrop-blur-sm">
+            <div className="pointer-events-none absolute right-3 bottom-3 z-30 sm:right-6 sm:bottom-6">
+              <div className="pointer-events-auto rounded-md border border-border/50 bg-background/90 px-2 py-1.5 shadow-sm backdrop-blur-sm sm:rounded-lg sm:px-3 sm:py-2">
                 {polaroidToggle}
               </div>
             </div>

@@ -107,9 +107,14 @@
 }
 
 @media (max-width: 767px) {
+  :root {
+    /* Tighter header stack on small screens (see `app/layout.tsx`). */
+    --site-header-offset: 5.5rem;
+  }
+
   .site-bg-photo {
-    /* Slightly larger than desktop `72vw` so the photo reads better on small screens. */
-    --site-bg-photo-size: min(84vw, 720px);
+    /* Smaller than desktop so the portrait does not dominate narrow viewports. */
+    --site-bg-photo-size: min(56vw, 380px);
   }
 }
 

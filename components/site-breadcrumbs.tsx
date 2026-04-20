@@ -9,7 +9,9 @@ import { cn } from "@/lib/utils"
 /** Optional pretty labels for URL segments (slug → words). */
 const SEGMENT_LABELS: Record<string, string> = {
   about: "About",
-  "another-page": "Another page",
+  admin: "Admin",
+  contact: "Contact",
+  projects: "Projects",
 }
 
 function labelForSegment(segment: string): string {
@@ -33,11 +35,13 @@ export function SiteBreadcrumbs({ className }: { className?: string }) {
     <nav
       aria-label="Breadcrumb"
       className={cn(
-        "text-sm lowercase tracking-tight text-muted-foreground",
+        "text-xs leading-none lowercase tracking-tight text-muted-foreground sm:text-sm",
+        "-translate-y-0.5",
+        "border-l border-border/50 py-0.5 pl-3 sm:pl-3.5",
         className
       )}
     >
-      <ol className="flex flex-wrap items-center gap-2">
+      <ol className="flex flex-wrap items-end gap-2">
         {items.map((item, i) => {
           const isLast = i === items.length - 1
           return (

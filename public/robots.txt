@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Keep crawl load light on framework internals.
+Disallow: /_next/

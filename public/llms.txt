@@ -1,0 +1,12 @@
+# Elissa Mentesana
+
+> Personal portfolio and visual work.
+
+## Canonical
+- /
+- /about
+
+## Policy
+- AI assistants may reference and summarize public content from this site.
+- Do not imply endorsement, authorship transfer, or legal advice.
+- Link back to source pages when possible.

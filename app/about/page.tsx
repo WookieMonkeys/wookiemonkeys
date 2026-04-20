@@ -22,10 +22,10 @@ export default function AboutPage() {
       </p>
       <p className="mt-6">
         <Link
-          href="/about/another-page"
-          className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+          href="/about/contact"
+          className="text-sm text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
         >
-          Another page (nested example) →
+          Contact →
         </Link>
       </p>
     </div>
