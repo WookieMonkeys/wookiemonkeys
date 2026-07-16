@@ -1,0 +1,89 @@
+.container {
+  position: absolute;
+  inset: 0;
+  outline: none;
+  overscroll-behavior: contain;
+  touch-action: none;
+}
+
+/* Origin: right edge of viewport, vertical center */
+.source {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 0;
+  height: 0;
+}
+
+/* Spoke rotates around the source (right edge) */
+.spoke {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 12.5vw;
+  height: 0;
+  transform-origin: right center;
+}
+
+@media (max-width: 768px) {
+  .spoke {
+    width: 50vw;
+  }
+}
+
+/* Thin ray line */
+.ray {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  transform: translateY(-0.5px);
+  background: linear-gradient(to right, transparent 10%, var(--fg) 100%);
+}
+
+/* Anchored at the far (left) end — center of screen */
+.labelWrapper {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Counter-rotated so text is always horizontal */
+.label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translateX(-50%) translateY(-50%);
+}
+
+.box {
+  display: inline-block;
+  white-space: nowrap;
+  font-family: var(--font-bubble), system-ui, sans-serif;
+  font-size: clamp(1.6rem, 1.8vw, 3.2rem);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 400;
+  color: inherit;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+@media (max-width: 768px) {
+  .box {
+    font-size: 1rem;
+    letter-spacing: 0.02em;
+  }
+}
+
+.box:hover {
+  transform: scale(1.08);
+}
+
+.box:focus-visible {
+  outline: 1px solid var(--fg);
+  outline-offset: 6px;
+}

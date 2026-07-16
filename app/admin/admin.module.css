@@ -1,0 +1,58 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.label {
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  opacity: 0.3;
+}
+
+.username {
+  font-size: 14px;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  opacity: 0.7;
+}
+
+.btn {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: var(--fg);
+  padding: 8px 20px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: lowercase;
+  cursor: none;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+.btn:hover { opacity: 1; }
+
+.btnGhost {
+  background: none;
+  border: none;
+  color: var(--fg);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: lowercase;
+  cursor: none;
+  opacity: 0.3;
+  transition: opacity 0.2s;
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+.btnGhost:hover { opacity: 0.6; }
